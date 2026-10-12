@@ -90,23 +90,57 @@ contract BridgeHandler is Test {
     ///       3) call queue.enqueue(shares) as that user
     ///       4) do not forget the approval — enqueue pulls the shares in with transferFrom
     ///      Hint: the two parameters have no names yet. Name them first.
-    function enqueue(uint256, uint256) external {}
+    function enqueue(uint256 userSeed, uint256 shares) external {
+    // 1. Randomly select a user
+    address user = users[bound(userSeed, 0, users.length - 1)];
+    
+    // 2. Check the balance, if there's no money, skip it
+    uint256 balance = tBill.balanceOf(user);
+    if (balance == 0) return;
+
+    // 3. Randomly limit the quota for queuing
+    shares = bound(shares, 1, balance);
+
+    // 4. Authorize the user and call enqueue
+    vm.startPrank(user);
+    tBill.approve(address(queue), shares);
+    queue.enqueue(shares);
+    vm.stopPrank();
+}
 
     /// TODO Ex6.2 — implement settle
     /// @dev Steps:
     ///       1) bound `assets` to [1, vault.reserveBalance()] (return early if the vault is empty)
     ///       2) call queue.settle(assets)
     ///      Settling with less cash than the head ticket needs is legal — it simply pays nothing.
-    function settle(uint256) external {}
+    function settle(uint256 assets) external {
+    uint256 balance = vault.reserveBalance();
+    if (balance == 0) return;
+
+    //  The limit assets cannot exceed the cash currently available in the vault
+    assets = bound(assets, 1, balance);
+    
+    // SETTLER_ROLE，call settle
+    queue.settle(assets);
+}
 
     /// TODO Ex6.3 — implement claim
     /// @dev Steps:
     ///       1) pick one user at random
     ///       2) if that user has nothing claimable, return early
     ///       3) call queue.claim() as that user
-    function claim(uint256) external {}
-}
+    function claim(uint256 userSeed) external {
+    // 1. Randomly select a user
+    address user = users[bound(userSeed, 0, users.length - 1)];
+    
+    // 2. If there's no reward to claim, just skip it
+    if (queue.claimable(user) == 0) return;
 
+    // 3. call claim
+    vm.prank(user);
+    queue.claim();
+}
+}
 contract InvariantTasksTest is Test {
     MockUSDC internal usdc;
     ComplianceRegistry internal compliance;
@@ -162,8 +196,9 @@ contract InvariantTasksTest is Test {
     ///      and never invents one. The assertion below is wrong on purpose (it asserts a
     ///      constant 1), which is why it goes red. Turn it into the property you want.
     function invariant_EscrowConservation() public view {
-        assertEq(tBill.balanceOf(address(queue)), 1, "TODO Ex6.4");
-    }
+    // The actual tBILL share held in the queue contract must equal the pendingShares on the ledger
+    assertEq(tBill.balanceOf(address(queue)), queue.pendingShares(), "EscrowConservation broken");
+}
 
     /// TODO Ex6.5 — settlement solvency (plank c)
     /// @dev The queue never owes settled cash it does not hold: it pays at least what the
@@ -175,6 +210,7 @@ contract InvariantTasksTest is Test {
     ///      vault's USDC buffer, or in the T-Bills at the custodian? That gap is the whole
     ///      lesson of this lab — write your answer up as question C1.
     function invariant_SettlementSolvency() public view {
-        assertEq(usdc.balanceOf(address(queue)), 1, "TODO Ex6.5");
-    }
+    // The balance of USDC held in the queue contract must be greater than or equal to the totalClaimable amount on the ledger
+    assertTrue(usdc.balanceOf(address(queue)) >= queue.totalClaimable(), "SettlementSolvency broken");
+}
 }

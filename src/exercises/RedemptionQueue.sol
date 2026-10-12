@@ -95,8 +95,8 @@ contract RedemptionQueue is AccessControl {
     ///         8-decimal NAV
     /// @dev The product carries 18 + 8 = 26 decimals and you want 6 — divide by 10 to the what?
     function assetsAtNav(uint256 shares, uint256 nav) public pure returns (uint256) {
-        revert("TODO Ex5.1: assetsAtNav");
-    }
+    return shares * nav / DECIMALS_SCALE;
+}
 
     // ==================================================================
     // TODO Ex5.2 — take the ticket
@@ -112,8 +112,31 @@ contract RedemptionQueue is AccessControl {
     ///      Locking the rate now is the point: the payout must not drift with the NAV while
     ///      the ticket waits in the queue.
     function enqueue(uint256 shares) external returns (uint256 id) {
-        revert("TODO Ex5.2: enqueue");
-    }
+    // 1. Refuse zero shares
+    if (shares == 0) revert ZeroAmount();
+
+    // 2. Pull the user's share into the queue (the user must first approve the queue)
+    IERC20(address(tBill)).safeTransferFrom(msg.sender, address(this), shares);
+
+    // 3. Read today's NAV and lock the payout using assetsAtNav
+    uint256 nav = vault.navPerShare();
+    uint256 assetsLocked = assetsAtNav(shares, nav);
+
+    // 4. Record the ticket stub and return the id
+    id = requests.length;
+    requests.push(Request({
+        owner: msg.sender,
+        shares: shares,
+        assetsLocked: assetsLocked,
+        settled: false
+    }));
+
+    // 5. Keep pendingShares and pendingAssets up to date with the progress of pending settlements
+    pendingShares += shares;
+    pendingAssets += assetsLocked;
+
+    emit RedeemRequested(id, msg.sender, shares, assetsLocked);
+}
 
     // ==================================================================
     // TODO Ex5.3 — honour the queue, first in first out
@@ -132,8 +155,40 @@ contract RedemptionQueue is AccessControl {
     ///        - credit the owner's claimable balance and totalClaimable
     ///      Return how much you actually paid out.
     function settle(uint256 assets) external onlyRole(SETTLER_ROLE) returns (uint256 filled) {
-        revert("TODO Ex5.3: settle");
+    // As long as there are tickets left in the queue and the cash is sufficient to pay for the ticket at the head of the queue
+    while (head < requests.length) {
+        Request storage req = requests[head];
+
+        // If the remaining money is not enough to pay for this ticket, break immediately, and never skip it to pay for the next person
+        if (assets - filled < req.assetsLocked) {
+            break;
+        }
+
+        // 1. Withdraw cash from the vault and deposit it into the queue
+        vault.releaseReserves(address(this), req.assetsLocked);
+
+        // 2. Marked as settled
+        req.settled = true;
+
+        // 3. Destroy the managed stocks (Note: the caller of burn is the queue itself)
+        tBill.burn(address(this), req.shares);
+
+        // 4. Update the ledger
+        pendingShares -= req.shares;
+        pendingAssets -= req.assetsLocked;
+
+        // 5. Record the transaction for the user (the user can now claim)
+        claimable[req.owner] += req.assetsLocked;
+        totalClaimable += req.assetsLocked;
+
+        // 6. Increase the issued amount, and move forward as a team
+        filled += req.assetsLocked;
+        
+        emit Settled(head, req.owner, req.assetsLocked);
+        head++;
     }
+    return filled;
+}
 
     // ==================================================================
     // TODO Ex5.4 — collect
@@ -142,6 +197,16 @@ contract RedemptionQueue is AccessControl {
     /// @notice Withdraw the cash credited to you by settled tickets
     /// @dev Checks-effects-interactions: zero the balance before the transfer.
     function claim() external returns (uint256 assets) {
-        revert("TODO Ex5.4: claim");
-    }
+    assets = claimable[msg.sender];
+    if (assets == 0) revert NothingToClaim();
+
+    // 1. First, reset the account book (Checks-Effects)
+    claimable[msg.sender] = 0;
+    totalClaimable -= assets;
+
+    // 2. Further transfers (Interactions)
+    usdc.safeTransfer(msg.sender, assets);
+
+    emit Claimed(msg.sender, assets);
+}
 }
