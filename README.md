@@ -220,3 +220,17 @@ What the zip must contain:
 
 The discussion prompts live in `STUDENT-QUESTIONS.md` — one per plank, no standard answers, and the
 real point of this lab.
+
+---
+
+## Deployment (Sepolia)
+
+| Contract | Address | Etherscan |
+| :--- | :--- | :--- |
+| MockUSDC | 0x5F61cFAd8fc8e08142193D06F610A76D45870e64 | https://sepolia.etherscan.io/address/0x5F61cFAd8fc8e08142193D06F610A76D45870e64 |
+| ComplianceRegistry | 0xdB42bfBf4f6FAF8FAC9014e67903dfA545bd1C5C | https://sepolia.etherscan.io/address/0xdB42bfBf4f6FAF8FAC9014e67903dfA545bd1C5C |
+| MockPriceFeed | 0x80d7B153C599e0939ABD1C81a1Fa32cC43133146 | https://sepolia.etherscan.io/address/0x80d7B153C599e0939ABD1C81a1Fa32cC43133146 |
+| TBillToken | 0x19b837937592fE8310973513eB447493375e6D7e | https://sepolia.etherscan.io/address/0x19b837937592fE8310973513eB447493375e6D7e |
+| MockTBillCustodian | 0xcC1a2EAFebAe98FA9E887c6BB78B321b928fFD18 | https://sepolia.etherscan.io/address/0xcC1a2EAFebAe98FA9E887c6BB78B321b928fFD18 |
+| TBillVault | 0xc6fFf26402c6CAb2D3060EEE1A929d8cF8b9b265 | https://sepolia.etherscan.io/address/0xc6fFf26402c6CAb2D3060EEE1A929d8cF8b9b265 |
+| RedemptionQueue | 0x1435C934Cfa782ce9Cd42DdB701293b5116487A7 | https://sepolia.etherscan.io/address/0x1435C934Cfa782ce9Cd42DdB701293b5116487A7 |
