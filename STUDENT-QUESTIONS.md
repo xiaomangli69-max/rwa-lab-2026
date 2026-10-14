@@ -171,13 +171,13 @@ write your test function names here:
 
 | Plank | Scenario | Your test function name |
 |---|---|---|
-| a | Shares exist while the custodian holds nothing | test_Ex2_SharesExistWhileTheCustodianHoldsNothing() |
-| a | `realHoldings()` moves with no cash moving | test_Ex2_RealHoldingsIsJustANumber() |
-| b | The claim value floats while the share count stays | test_Ex3_TheClaimFloats_TheShareCountDoesNot() |
-| b | One `attest` re-prices every holder at once | test_Ex3_OneCallMovesTheWholeBook() |
-| d | A non-whitelisted address cannot receive shares, even by paying | test_Ex4_NoKyc_NoShares_EvenIfYouPay() |
-| d | A whitelisted holder cannot send shares to a non-whitelisted address | test_Ex4_TransferChecksBothEndpoints() |
-| d | Removing an address freezes that holder — and blocks a burn | test_Ex4_FreezeBeatsConfiscation() |
+| a | Shares exist while the custodian holds nothing | `test_Ex2_SharesExistWhileTheCustodianHoldsNothing` |
+| a | `realHoldings()` moves with no cash moving | `test_Ex2_RealHoldingsIsJustANumber` |
+| b | The claim value floats while the share count stays | `test_Ex3_TheClaimFloats_TheShareCountDoesNot` |
+| b | One `attest` re-prices every holder at once | `test_Ex3_OneCallMovesTheWholeBook` |
+| d | A non-whitelisted address cannot receive shares, even by paying | `test_Ex4_NoKyc_NoShares_EvenIfYouPay` |
+| d | A whitelisted holder cannot send shares to a non-whitelisted address | `test_Ex4_TransferChecksBothEndpoints`|
+| d | Removing an address freezes that holder — and blocks a burn | `test_Ex4_FreezeBeatsConfiscation` |
 
 Then write one more scenario you consider **most likely to be exploited** on a tokenized fund, and
 say which plank it breaks:
