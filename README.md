@@ -234,3 +234,14 @@ real point of this lab.
 | MockTBillCustodian | 0xcC1a2EAFebAe98FA9E887c6BB78B321b928fFD18 | https://sepolia.etherscan.io/address/0xcC1a2EAFebAe98FA9E887c6BB78B321b928fFD18 |
 | TBillVault | 0xc6fFf26402c6CAb2D3060EEE1A929d8cF8b9b265 | https://sepolia.etherscan.io/address/0xc6fFf26402c6CAb2D3060EEE1A929d8cF8b9b265 |
 | RedemptionQueue | 0x1435C934Cfa782ce9Cd42DdB701293b5116487A7 | https://sepolia.etherscan.io/address/0x1435C934Cfa782ce9Cd42DdB701293b5116487A7 |
+
+---
+
+## Architecture & Screenshots
+
+
+![Architecture Diagram](./Picture(Screenshots&Architecture)/architecture.png)
+
+![Test Passed 1](./Picture(Screenshots&Architecture)/test_passed1.png)
+
+![Test Passed 2](./Picture(Screenshots&Architecture)/test_passed2.png)
